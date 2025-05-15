@@ -1,5 +1,9 @@
 package Esecuzione;
 
+import org.apache.commons.io.FileUtils;
+
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.DoubleSummaryStatistics;
 import java.util.List;
@@ -48,7 +52,10 @@ public class MainE {
 
         System.out.println("Esercizio 1");
        Map<Customer,List<Product>> es1 = ordiniGlobali.stream().collect(Collectors.toMap(Order::getCustomer,Order::getProducts));
+
+       Map<Customer,List<Order>> cor1 = ordiniGlobali.stream().collect(Collectors.groupingBy(Order::getCustomer));
         System.out.println("Es1 : " + es1);
+        System.out.println("Cor1 : " + cor1);
         System.out.println("=================================");
         System.out.println();
         //Esercizio #2
@@ -57,27 +64,42 @@ public class MainE {
         System.out.println("Esercizio 2");
          Map<Customer,Double> es2 =  ordiniGlobali.stream().collect(Collectors.toMap(Order::getCustomer,order -> order.getProducts().stream().
                 mapToDouble(Product::getPrice).sum(),Double::sum));
+          Map<Customer,Double> cor2= ordiniGlobali.stream().collect(Collectors.groupingBy(Order::getCustomer,Collectors.summingDouble(ord-> ord.getProducts().stream().mapToDouble(Product::getPrice).sum())));
         System.out.println("Es2 : " + es2);
+        System.out.println("Cor2 : " + cor2);
         System.out.println("=================================");
         System.out.println();
 
         //Dato un elenco di prodotti, trova i prodotti più costosi utilizzando Stream e Lambda
 
         DoubleSummaryStatistics es3 = prodotti.stream().collect(Collectors.summarizingDouble(Product::getPrice));
+       List<Product> cor3 = prodotti.stream().filter(product -> product.getPrice()== prodotti.stream().mapToDouble(Product::getPrice).max().getAsDouble()).toList();
         System.out.println( "Es3 : " + es3.getMax());
+        System.out.println("Coe3 : " + cor3);
         System.out.println("=================================");
         System.out.println();
         //Esercizio #4
         //Dato un elenco di ordini, calcola la media degli importi degli ordini utilizzando Stream e Lambda Expressions
-       Double es4 = ordiniGlobali.stream().map(order -> order.getProducts().stream().collect(Collectors.averagingDouble(Product::getPrice)));
+       //ordiniGlobali.stream().collect(Collectors.averagingDouble(ordini-> ordini.getProducts().stream().collect(Collectors.averagingDouble(Order::)) ))       ;
+        System.out.println("Esercizio 4 ");
+        Double es4 =   ordiniGlobali.stream().mapToDouble(ordine -> ordine.getProducts().stream().mapToDouble(Product::getPrice).sum()).average().getAsDouble();
+        System.out.println("Es 4 : " + es4);
+        System.out.println("=================================");
+        System.out.println();
 
-
-
-
+        //es6
 
 
     }
 
-
+    public static void salvaprodotti(List<Product> products) throws IOException {
+        String ps = "";
+        products.stream().map(product -> {String ps1 = product.getName() + "@" + product.getCategory()
+        + "@" + product.getPrice();
+            return ps;
+        }).collect(Collectors.joining("#"));
+        File file = new File("prodotti.txt");
+        FileUtils.writeStringToFile(file,ps,"UTF-8",false);
+    }
 
 }
